@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Purchase Application</title>
+</head>
+<body>
+    <h1>Purchase Application</h1>
+
+    {% if errors %}
+        <ul>
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form action="/buy/" method="post">
+        <p>App name: <input type="text" name="app_name"></p>
+        <p>Your name: <input type="text" name="name"></p>
+        <p>Cost Code: <input type="text" name="cost_code"></p></p>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
