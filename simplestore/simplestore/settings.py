@@ -51,6 +51,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
+
+
 ROOT_URLCONF = 'simplestore.urls'
 
 TEMPLATES = [

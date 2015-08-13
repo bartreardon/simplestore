@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^current_datetime/$', views.current_datetime),
     url(r'^usertest/$', views.usertest),
     url(r'^formtest/$', views.get_name),
+    url(r'^buy_app/$', views.buy_app, name='buy_app'),
 ]

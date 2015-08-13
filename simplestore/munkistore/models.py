@@ -12,4 +12,5 @@ class Purchases(models.Model):
     purchased_app = models.ForeignKey(Apps)
     user = models.CharField(max_length=200)
     purchase_date = models.DateTimeField('date purchased')
+    cost_code = models.CharField(max_length=20)
     

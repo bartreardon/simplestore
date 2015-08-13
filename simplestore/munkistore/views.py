@@ -7,7 +7,7 @@ from django.core import serializers
 from django.shortcuts import render
 
 from .models import Apps, Purchases
-from .forms import NameForm
+from .forms import NameForm, BuyForm
 
 import datetime
 
@@ -21,9 +21,12 @@ def applist(request):
 	return HttpResponse(data, content_type='application/json')
 	
 def purchased_apps(request):
-	username = request.user
-	#purchases = Purchases.objects.filter(user="%s" % username)
-	purchases = Apps.objects.filter(purchases__user="bart")
+	
+	# change to whatever username you need or use some kind of auth
+	username = "bart"
+	#username = request.user
+	
+	purchases = Apps.objects.filter(purchases__user=username)
 	data = serializers.serialize('json', purchases)
 
 	return HttpResponse(data, content_type='application/json')
@@ -39,38 +42,57 @@ def usertest(request):
     return HttpResponse(html)
     
     
-def get_name(request):
-    # if this is a POST request we need to process the form data
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = NameForm(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-            name = request.GET.get('name', '')
-            return HttpResponse("Hello %s" % name)
+def get_name(request, **kwargs):
 
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        form = NameForm()
-        name = request.GET.get('name', '')
+    appName = request.GET.get('appName', '')
+    userName = request.GET.get('userName', '')
+    form = BuyForm(initial={'appName': appName, 'user': userName, 'purchase_date': datetime.datetime.now()})
 		
-    return render(request, 'name.html', {'form': form})
+    return render(request, 'purchase.html', {'form': form})
     
-def buy(request):
+def buy_app(request):
     errors = []
     if request.method == 'POST':
-        if not request.POST.get('app_name', ''):
-            errors.append('enter an application name.')
-        if not request.POST.get('name', ''):
-            errors.append('Enter your name')
-        if request.POST.get('cost_code'):
-            errors.append('Enter a  cost code.')
-        if not errors:
+    
+        form = BuyForm(request.POST)
+        if form.is_valid():
+        	
+        	purchasedApp = form.save(commit=False)
+        	
+        	appName = form.data['appName']
+        	appObject = Apps.objects.get(app_name=appName)
+        	appNameKey = appObject.id
+        	#form.instance.purchased_app = Apps.objects.filter(purchases__purchased_app=appName)
+        	#form.data['purchased_app'] = appNameKey
+        	purchasedApp.purchased_app = appNameKey
+        	
+        	
+        	purchasedApp.save()
+        	return HttpResponseRedirect('/contact/thanks/')
+            #appName = form.cleaned_data['appName']
+            #userName = form.cleaned_data['userName']
+            #costCode = form.cleaned_data['costCode']
+
+            #purchases = Apps.objects.create(
+            #    purchases__app=appName,
+            #    user=userName,
+            #    purchase_date=datetime.datetime.now(),
+            #    cost_code=costCode,)
+    	
+        #if not request.POST.get('appName', ''):
+        #    errors.append('enter an application name.')
+        #if not request.POST.get('userName', ''):
+        #    errors.append('Enter your name')
+        #if not request.POST.get('costCode'):
+        #    errors.append('Enter a  cost code.')
+        #if not errors:
             # write to the DB or something
-            return HttpResponseRedirect('/contact/thanks/')
+        #    appName = request.POST.get('appName', '')
+        #    userName = request.POST.get('userName', '')
+        #    costCode = request.POST.get('costCode')
+            
+            
+        return HttpResponseRedirect('/contact/thanks/')
     return render(request, 'contact_form.html',
         {'errors': errors})
 
